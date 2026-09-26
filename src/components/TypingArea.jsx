@@ -12,11 +12,13 @@ export function TypingArea({
   onRestart,
   quoteMeta,
   codeMeta,
-  mode
+  mode,
+  onCaretPositionUpdate
 }) {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
   const activeWordRef = useRef(null);
+  const caretRef = useRef(null);
 
   const [isFocused, setIsFocused] = useState(true);
 
@@ -26,6 +28,14 @@ export function TypingArea({
       inputRef.current.focus();
     }
   }, [status]);
+
+  // Track Caret Position for Particles
+  useEffect(() => {
+    if (caretRef.current && onCaretPositionUpdate) {
+      const rect = caretRef.current.getBoundingClientRect();
+      onCaretPositionUpdate(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    }
+  }, [currentInput, currentWordIndex, onCaretPositionUpdate]);
 
   const handleContainerClick = () => {
     if (inputRef.current) {
@@ -124,7 +134,7 @@ export function TypingArea({
       >
         {/* Word Stream */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 12px' }}>
-          {words.map((word, wIdx) => {
+          {words?.map((word, wIdx) => {
             const isCurrent = wIdx === currentWordIndex;
             const isPast = wIdx < currentWordIndex;
             const pastRecord = typedHistory[wIdx];
@@ -141,15 +151,15 @@ export function TypingArea({
               >
                 {/* Active Caret when word is empty (start of word) */}
                 {isCurrent && currentInput.length === 0 && isFocused && (
-                  <span className={`inline-caret style-${caretStyle} ${status === 'idle' ? 'is-blinking' : ''}`} style={{ left: '-1px' }} />
+                  <span ref={caretRef} className={`inline-caret style-${caretStyle} ${status === 'idle' ? 'is-blinking' : ''}`} style={{ left: '-1px' }} />
                 )}
 
-                {word.split('').map((char, cIdx) => {
+                {word?.split('').map((char, cIdx) => {
                   let charClass = 'char-pending';
                   const isCharActive = isCurrent && cIdx === currentInput.length;
 
                   if (isPast) {
-                    if (pastRecord) {
+                    if (pastRecord?.typed) {
                       const typedChar = pastRecord.typed[cIdx];
                       charClass = typedChar === char ? 'char-correct' : 'char-error';
                     }
@@ -168,7 +178,7 @@ export function TypingArea({
                     >
                       {/* Active Caret on current character */}
                       {isCharActive && isFocused && (
-                         <span className={`inline-caret style-${caretStyle} ${status === 'idle' ? 'is-blinking' : ''}`} />
+                         <span ref={caretRef} className={`inline-caret style-${caretStyle} ${status === 'idle' ? 'is-blinking' : ''}`} />
                       )}
                       {char}
                     </span>
@@ -176,19 +186,19 @@ export function TypingArea({
                 })}
 
                 {/* Render extra mistyped characters if user typed beyond word length */}
-                {isCurrent && currentInput.length > word.length && (
+                {isCurrent && currentInput.length > (word?.length || 0) && (
                   <span className="char-extra" style={{ position: 'relative' }}>
                     {/* Caret at end of extra chars */}
                     {isFocused && (
-                      <span className={`inline-caret style-${caretStyle}`} style={{ left: '100%' }} />
+                      <span ref={caretRef} className={`inline-caret style-${caretStyle}`} style={{ left: '100%' }} />
                     )}
-                    {currentInput.slice(word.length)}
+                    {currentInput.slice(word?.length || 0)}
                   </span>
                 )}
                 
                 {/* Caret exactly at end of a perfectly typed word (before pressing space) */}
-                {isCurrent && currentInput.length === word.length && isFocused && (
-                  <span className={`inline-caret style-${caretStyle}`} style={{ left: '100%' }} />
+                {isCurrent && currentInput.length === (word?.length || 0) && isFocused && (
+                  <span ref={caretRef} className={`inline-caret style-${caretStyle}`} style={{ left: '100%' }} />
                 )}
               </span>
             );

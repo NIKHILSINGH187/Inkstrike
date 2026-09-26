@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useDailyStreak() {
   const [streak, setStreak] = useState(0);
@@ -26,33 +26,35 @@ export function useDailyStreak() {
     }
   }, []);
 
-  const recordPlay = () => {
-    const storedDate = localStorage.getItem('inkstrike_last_play');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    let newStreak = streak;
+  const recordPlay = useCallback(() => {
+    setStreak(prevStreak => {
+      const storedDate = localStorage.getItem('inkstrike_last_play');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      let newStreak = prevStreak;
 
-    if (!storedDate) {
-       newStreak = 1;
-    } else {
-      const lastDate = new Date(storedDate);
-      lastDate.setHours(0, 0, 0, 0);
-      
-      const diffTime = today.getTime() - lastDate.getTime();
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 1) {
-         newStreak = streak + 1;
-      } else if (diffDays > 1) {
+      if (!storedDate) {
          newStreak = 1;
+      } else {
+        const lastDate = new Date(storedDate);
+        lastDate.setHours(0, 0, 0, 0);
+        
+        const diffTime = today.getTime() - lastDate.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+           newStreak = prevStreak + 1;
+        } else if (diffDays > 1) {
+           newStreak = 1;
+        }
       }
-    }
 
-    setStreak(newStreak);
-    localStorage.setItem('inkstrike_daily_streak', newStreak.toString());
-    localStorage.setItem('inkstrike_last_play', new Date().toISOString());
-  };
+      localStorage.setItem('inkstrike_daily_streak', newStreak.toString());
+      localStorage.setItem('inkstrike_last_play', new Date().toISOString());
+      return newStreak;
+    });
+  }, []);
 
   return { streak, recordPlay };
 }
