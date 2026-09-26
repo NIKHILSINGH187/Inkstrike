@@ -12,15 +12,12 @@ export function TypingArea({
   onRestart,
   quoteMeta,
   codeMeta,
-  mode,
-  onCaretPositionUpdate
+  mode
 }) {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
-  const activeCharRef = useRef(null);
   const activeWordRef = useRef(null);
 
-  const [caretPos, setCaretPos] = useState({ x: 0, y: 0, width: 2, height: 32 });
   const [isFocused, setIsFocused] = useState(true);
 
   // Auto-focus input on mount and whenever clicking the typing container
@@ -36,48 +33,6 @@ export function TypingArea({
       setIsFocused(true);
     }
   };
-
-  // Compute Caret Position based on active character element
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    let targetElem = activeCharRef.current;
-    if (!targetElem && activeWordRef.current) {
-      // If at end of word or starting a word with no char yet
-      targetElem = activeWordRef.current;
-    }
-
-    if (targetElem && containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const targetRect = targetElem.getBoundingClientRect();
-
-      let x = targetRect.left - containerRect.left;
-      let y = targetRect.top - containerRect.top;
-      let width = 2;
-      let height = targetRect.height || 32;
-
-      // If at the end of word or targeting character directly
-      if (activeCharRef.current) {
-        if (caretStyle === 'block' || caretStyle === 'box') {
-          width = targetRect.width || 12;
-        } else if (caretStyle === 'underline') {
-          width = targetRect.width || 12;
-          height = 3;
-          y += targetRect.height - 3;
-        }
-      } else if (activeWordRef.current && currentInput.length > 0) {
-        // Position at the end of the active word
-        x = (targetRect.right - containerRect.left);
-      }
-
-      const newPos = { x, y, width, height };
-      setCaretPos(newPos);
-
-      if (onCaretPositionUpdate) {
-        onCaretPositionUpdate(targetRect.left + width / 2, targetRect.top + height / 2);
-      }
-    }
-  }, [currentWordIndex, currentInput, words, caretStyle, onCaretPositionUpdate]);
 
   // Keep active line scrolled into view
   useEffect(() => {
@@ -167,18 +122,6 @@ export function TypingArea({
           scrollBehavior: 'smooth'
         }}
       >
-        {/* Smooth Gliding Caret */}
-        {isFocused && (
-          <div
-            className={`caret-cursor style-${caretStyle} ${status === 'idle' ? 'is-blinking' : ''}`}
-            style={{
-              transform: `translate3d(${caretPos.x}px, ${caretPos.y}px, 0)`,
-              width: `${caretPos.width}px`,
-              height: `${caretPos.height}px`
-            }}
-          />
-        )}
-
         {/* Word Stream */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 12px' }}>
           {words.map((word, wIdx) => {
@@ -196,6 +139,11 @@ export function TypingArea({
                   marginBottom: '6px'
                 }}
               >
+                {/* Active Caret when word is empty (start of word) */}
+                {isCurrent && currentInput.length === 0 && isFocused && (
+                  <span className={`inline-caret style-${caretStyle} ${status === 'idle' ? 'is-blinking' : ''}`} style={{ left: '-1px' }} />
+                )}
+
                 {word.split('').map((char, cIdx) => {
                   let charClass = 'char-pending';
                   const isCharActive = isCurrent && cIdx === currentInput.length;
@@ -215,10 +163,13 @@ export function TypingArea({
                   return (
                     <span
                       key={cIdx}
-                      ref={isCharActive ? activeCharRef : null}
                       className={charClass}
                       style={{ position: 'relative' }}
                     >
+                      {/* Active Caret on current character */}
+                      {isCharActive && isFocused && (
+                         <span className={`inline-caret style-${caretStyle} ${status === 'idle' ? 'is-blinking' : ''}`} />
+                      )}
                       {char}
                     </span>
                   );
@@ -226,9 +177,18 @@ export function TypingArea({
 
                 {/* Render extra mistyped characters if user typed beyond word length */}
                 {isCurrent && currentInput.length > word.length && (
-                  <span className="char-extra">
+                  <span className="char-extra" style={{ position: 'relative' }}>
+                    {/* Caret at end of extra chars */}
+                    {isFocused && (
+                      <span className={`inline-caret style-${caretStyle}`} style={{ left: '100%' }} />
+                    )}
                     {currentInput.slice(word.length)}
                   </span>
+                )}
+                
+                {/* Caret exactly at end of a perfectly typed word (before pressing space) */}
+                {isCurrent && currentInput.length === word.length && isFocused && (
+                  <span className={`inline-caret style-${caretStyle}`} style={{ left: '100%' }} />
                 )}
               </span>
             );

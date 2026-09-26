@@ -36,36 +36,47 @@ html, body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
-/* Smooth Caret */
-.caret-cursor {
+/* Inline Caret (MonkeyType Style) */
+.inline-caret {
   position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.1s ease;
   pointer-events: none;
   z-index: 10;
-  transition: transform 0.09s cubic-bezier(0.2, 0.9, 0.3, 1), width 0.08s ease, height 0.08s ease;
-  will-change: transform;
 }
 
-.caret-cursor.style-line {
+.inline-caret.style-line {
   width: 2.5px;
+  height: 1.2em;
   background-color: var(--caret-color);
   box-shadow: 0 0 10px var(--accent-glow);
   border-radius: 2px;
+  left: -1px;
 }
 
-.caret-cursor.style-block {
+.inline-caret.style-block {
+  width: 1em;
+  height: 1.2em;
   background-color: var(--caret-color);
-  opacity: 0.35;
+  opacity: 0.4;
   border-radius: 3px;
 }
 
-.caret-cursor.style-underline {
-  height: 3px !important;
+.inline-caret.style-underline {
+  width: 1em;
+  height: 3px;
+  top: auto;
+  bottom: -2px;
+  transform: none;
   background-color: var(--caret-color);
   box-shadow: 0 0 8px var(--accent-glow);
-  align-self: flex-end;
 }
 
-.caret-cursor.style-box {
+.inline-caret.style-box {
+  width: 1em;
+  height: 1.2em;
   border: 2px solid var(--caret-color);
   background-color: transparent;
   box-shadow: 0 0 8px var(--accent-glow);
@@ -77,9 +88,11 @@ html, body {
   50% { opacity: 0; }
 }
 
-.caret-cursor.is-blinking {
+.inline-caret.is-blinking {
   animation: caretBlink 0.9s ease-in-out infinite;
 }
+
+/* Legacy Caret Removed - Replaced with inline */
 
 /* CRT Scanlines for Matrix theme */
 [data-theme="matrix"] .crt-overlay {
@@ -200,16 +213,16 @@ button, input, select {
   font-weight: 600;
 }
 
-/* Modal Dialog animation per modern web guidelines */
+/* Smooth fade-in modal */
 dialog[open], .modal-overlay {
   opacity: 1;
-  transform: scale(1);
-  transition: opacity 0.25s ease-out, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 @starting-style {
   dialog[open], .modal-overlay {
     opacity: 0;
-    transform: scale(0.96);
+    transform: translateY(8px);
   }
 }

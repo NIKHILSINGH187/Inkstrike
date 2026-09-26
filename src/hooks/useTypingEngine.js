@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getRandomWords } from '../data/words';
 import { getRandomQuote } from '../data/quotes';
 import { getRandomSnippet } from '../data/codeSnippets';
+import { getLearningLevel } from '../data/learningLevels';
 import { soundEngine } from '../audio/soundEngine';
 
 export function useTypingEngine({
@@ -10,6 +11,7 @@ export function useTypingEngine({
   wordLimit = 25,
   quoteLength = 'all',
   codeLang = 'all',
+  learnLevel = 1,
   punctuation = false,
   numbers = false,
   soundEnabled = true,
@@ -90,13 +92,18 @@ export function useTypingEngine({
       setWords(getRandomWords(wordLimit, { punctuation, numbers }));
       setQuoteMeta(null);
       setCodeMeta(null);
+    } else if (mode === 'learn') {
+      const level = getLearningLevel(learnLevel);
+      setWords(level.words);
+      setQuoteMeta(null);
+      setCodeMeta(null);
     } else {
       // time, zen, or sudden_death
       setWords(getRandomWords(80, { punctuation, numbers }));
       setQuoteMeta(null);
       setCodeMeta(null);
     }
-  }, [mode, timeLimit, wordLimit, quoteLength, codeLang, punctuation, numbers]);
+  }, [mode, timeLimit, wordLimit, quoteLength, codeLang, learnLevel, punctuation, numbers]);
 
   // Initial load
   useEffect(() => {
@@ -197,7 +204,7 @@ export function useTypingEngine({
         // Check test completion conditions
         if (
           (mode === 'words' && currentWordIndex + 1 >= wordLimit) ||
-          ((mode === 'quote' || mode === 'code') && currentWordIndex + 1 >= words.length)
+          ((mode === 'quote' || mode === 'code' || mode === 'learn') && currentWordIndex + 1 >= words.length)
         ) {
           setCurrentInput('');
           finishTest();

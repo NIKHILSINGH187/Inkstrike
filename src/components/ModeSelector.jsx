@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Type, Quote, Code2, Feather, Skull, Hash, AtSign } from 'lucide-react';
+import { Clock, Type, Quote, Code2, Feather, Skull, Hash, AtSign, Target } from 'lucide-react';
 
 export function ModeSelector({
   mode,
@@ -12,6 +12,8 @@ export function ModeSelector({
   setQuoteLength,
   codeLang,
   setCodeLang,
+  learnLevel,
+  setLearnLevel,
   punctuation,
   setPunctuation,
   numbers,
@@ -19,6 +21,7 @@ export function ModeSelector({
   disabled
 }) {
   const modes = [
+    { id: 'learn', label: 'Learn', icon: Target },
     { id: 'time', label: 'Time', icon: Clock },
     { id: 'words', label: 'Words', icon: Type },
     { id: 'quote', label: 'Quote', icon: Quote },
@@ -74,6 +77,22 @@ export function ModeSelector({
         flexWrap: 'wrap',
         justifyContent: 'center'
       }}>
+        {/* Learn Mode Sub-options */}
+        {mode === 'learn' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {[1, 2, 3, 4, 5].map(lvl => (
+              <button
+                key={lvl}
+                onClick={() => setLearnLevel(lvl)}
+                className={`btn-pill ${learnLevel === lvl ? 'active' : ''}`}
+                style={{ padding: '3px 10px', fontSize: '0.75rem' }}
+              >
+                Level {lvl}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Time Mode Sub-options */}
         {mode === 'time' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import confetti from 'canvas-confetti';
 import { 
   Trophy, 
   RotateCcw, 
@@ -31,21 +30,6 @@ export function ResultModal({
 }) {
   const chartRef = useRef(null);
   const [copied, setCopied] = useState(false);
-
-  // Trigger celebration confetti on mount if high accuracy / personal best
-  useEffect(() => {
-    if (isNewPersonalBest || wpm > 80) {
-      try {
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      } catch (e) {
-        // Fallback gracefully
-      }
-    }
-  }, [isNewPersonalBest, wpm]);
 
   // Render Canvas Chart for WPM and Error timeline
   useEffect(() => {

@@ -29,7 +29,8 @@ export function Header({
   soundMuted,
   toggleSoundMute,
   onOpenSettings,
-  onOpenPalette
+  onOpenPalette,
+  dailyStreak = 0
 }) {
   return (
     <header style={{
@@ -41,48 +42,68 @@ export function Header({
       margin: '0 auto',
       width: '100%'
     }}>
-      {/* Brand Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '10px',
-          background: 'linear-gradient(135deg, var(--accent), var(--accent-secondary))',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--bg-primary)',
-          boxShadow: '0 0 16px var(--accent-glow)'
-        }}>
-          <Zap size={22} strokeWidth={2.5} />
-        </div>
-        <div>
+      {/* Brand Logo & Streak Badges */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            fontSize: '1.25rem',
-            fontWeight: 800,
-            letterSpacing: '-0.5px',
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, var(--accent), var(--accent-secondary))',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            justifyContent: 'center',
+            color: 'var(--bg-primary)',
+            boxShadow: '0 0 16px var(--accent-glow)'
           }}>
-            <span>INKSTRIKE</span>
-            <span style={{
-              fontSize: '0.65rem',
-              fontWeight: 700,
-              padding: '2px 6px',
-              borderRadius: '4px',
-              background: 'var(--accent)',
-              color: 'var(--bg-primary)',
-              letterSpacing: '1px',
-              textTransform: 'uppercase'
-            }}>
-              ULTRA
-            </span>
+            <Zap size={22} strokeWidth={2.5} />
           </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-            Next-Gen Mechanical Typing Engine
+          <div>
+            <div style={{
+              fontSize: '1.25rem',
+              fontWeight: 800,
+              letterSpacing: '-0.5px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span>INKSTRIKE</span>
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: 'var(--accent)',
+                color: 'var(--bg-primary)',
+                letterSpacing: '1px',
+                textTransform: 'uppercase'
+              }}>
+                ULTRA
+              </span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+              Next-Gen Mechanical Typing Engine
+            </div>
           </div>
         </div>
+
+        {/* Daily Streak Indicator */}
+        {dailyStreak > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '16px', borderLeft: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ff5e00', fontWeight: 700, fontSize: '0.9rem' }}>
+              <Flame size={18} fill="#ff5e00" />
+              <span>{dailyStreak}</span>
+            </div>
+            
+            {/* Badges based on streak milestones */}
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {dailyStreak >= 7 && <span title="7 Day Streak: Scholar" style={{ fontSize: '1.1rem' }}>🥉</span>}
+              {dailyStreak >= 30 && <span title="30 Day Streak: Professional" style={{ fontSize: '1.1rem' }}>🥈</span>}
+              {dailyStreak >= 50 && <span title="50 Day Streak: Master" style={{ fontSize: '1.1rem' }}>🥇</span>}
+              {dailyStreak >= 100 && <span title="100 Day Streak: Grandmaster" style={{ fontSize: '1.1rem' }}>💎</span>}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right Controls */}

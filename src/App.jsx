@@ -9,9 +9,11 @@ import { SettingsDrawer } from './components/SettingsDrawer';
 import { ParticleCanvas } from './components/ParticleCanvas';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTypingEngine } from './hooks/useTypingEngine';
+import { useDailyStreak } from './hooks/useDailyStreak';
 import { soundEngine } from './audio/soundEngine';
 
 export function App() {
+  const { streak: dailyStreak, recordPlay } = useDailyStreak();
   // Persistent User Preferences
   const [theme, setTheme] = useLocalStorage('inkstrike_theme', 'cyberpunk');
   const [font, setFont] = useLocalStorage('inkstrike_font', 'jetbrains');
@@ -29,6 +31,7 @@ export function App() {
   const [wordLimit, setWordLimit] = useState(25);
   const [quoteLength, setQuoteLength] = useState('all');
   const [codeLang, setCodeLang] = useState('all');
+  const [learnLevel, setLearnLevel] = useLocalStorage('inkstrike_learn_level', 1);
   const [punctuation, setPunctuation] = useState(false);
   const [numbers, setNumbers] = useState(false);
 
@@ -68,6 +71,7 @@ export function App() {
     wordLimit,
     quoteLength,
     codeLang,
+    learnLevel,
     punctuation,
     numbers,
     soundEnabled: !soundMuted,
@@ -82,6 +86,13 @@ export function App() {
       setPersonalBest(engine.wpm);
     }
   }, [isNewPB, engine.wpm, setPersonalBest]);
+
+  // Record daily streak when a test finishes
+  useEffect(() => {
+    if (engine.status === 'finished' && engine.wpm > 5) {
+      recordPlay();
+    }
+  }, [engine.status, engine.wpm, recordPlay]);
 
   // Trigger particle burst on correct keypress
   const handleInputWithParticles = (val) => {
@@ -176,6 +187,7 @@ export function App() {
         toggleSoundMute={toggleSoundMute}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenPalette={() => setIsPaletteOpen(true)}
+        dailyStreak={dailyStreak}
       />
 
       {/* Main Content Area */}
@@ -203,6 +215,8 @@ export function App() {
               setQuoteLength={setQuoteLength}
               codeLang={codeLang}
               setCodeLang={setCodeLang}
+              learnLevel={learnLevel}
+              setLearnLevel={setLearnLevel}
               punctuation={punctuation}
               setPunctuation={setPunctuation}
               numbers={numbers}
